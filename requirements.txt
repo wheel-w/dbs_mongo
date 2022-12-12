@@ -1,0 +1,8 @@
+# -*- coding: utf-8 -*-
+Django==3.2.4
+djangorestframework==3.11.2
+drf-yasg==1.20.0
+pydantic==1.9.1
+django-filter==2.4.0
+pymongo==4.3.3
+pycryptodome==3.10.1
