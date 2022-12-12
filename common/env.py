@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     LOGIN_ACCOUNT_COMPONENT_NAME: str = "bk_ticket"
     LOGIN_AUTH_URL: str = ""
     SUPERUSERS: str = ""
+    CORS_ALLOWED_HOSTS: str = ""
 
     class Config:
         case_sensitive = True
