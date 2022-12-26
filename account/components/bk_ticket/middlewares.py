@@ -7,6 +7,7 @@ from django.utils.deprecation import MiddlewareMixin
 
 from account.components.bk_ticket.forms import AuthenticationForm
 from account.handlers.response import ResponseHandler
+from common.utils.local import local
 
 logger = logging.getLogger("mongo")
 cache = caches["login_db"]
@@ -21,6 +22,7 @@ class LoginRequiredMiddleware(MiddlewareMixin):
 
         user = self.authenticate(request)
         if user:
+            local.request_username = request.user.username
             return None
 
         handler = ResponseHandler()

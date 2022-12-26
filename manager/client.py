@@ -9,34 +9,48 @@ logger = logging.getLogger("mongo")
 
 
 class DbsMongoClient:
-    def __init__(self, instance_id):
-        self.instance = MongoInstance.objects.get_instance(instance_id)
-        self.client = pymongo.MongoClient(
-            host=self.instance.db_host,
-            port=self.instance.db_port,
-            username=self.instance.db_user,
-            password=self.instance.plain_password,
-            authSource=self.instance.auth_source,
-            authMechanism=self.instance.auth_mechanism,
-        )
+    def __init__(self, instance_id=None, instance_kwargs=None):
+        self.instance_id = instance_id
+        self.instance_kwargs = instance_kwargs
+        self.client = None
 
-    @staticmethod
-    def test_connection(instance_kwargs):
+    def __enter__(self):
+        client_kwargs = {}
+        if self.instance_id:
+            instance = MongoInstance.objects.get_instance(self.instance_id)
+            client_kwargs = {
+                "host": instance.db_host,
+                "port": instance.db_port,
+                "username": instance.db_user,
+                "password": instance.plain_password,
+                "authSource": instance.auth_source,
+                "authMechanism": instance.auth_mechanism,
+            }
+        if self.instance_kwargs:
+            client_kwargs = {
+                "host": self.instance_kwargs.get("db_host"),
+                "port": self.instance_kwargs.get("db_port"),
+                "username": self.instance_kwargs.get("db_user"),
+                "password": self.instance_kwargs.get("db_password"),
+                "authSource": self.instance_kwargs.get("auth_source"),
+                "authMechanism": self.instance_kwargs.get("auth_mechanism"),
+            }
+        self.client = pymongo.MongoClient(**client_kwargs)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.client:
+            self.client.close()
+        return False
+
+    def test_connection(self):
         try:
-            test_client = pymongo.MongoClient(
-                host=instance_kwargs.get("db_host"),
-                port=instance_kwargs.get("db_port", 27017),
-                username=instance_kwargs.get("db_user", ""),
-                password=instance_kwargs.get("db_password", ""),
-                authSource=instance_kwargs.get("auth_source", "admin"),
-                authMechanism=instance_kwargs.get("auth_mechanism", "DEFAULT"),
-            )
-            test_client.server_info()
-        except PyMongoError:
-            logger.exception("连接mongo失败,请检查连接信息")
-            return False
+            self.client.server_info()
+        except PyMongoError as e:
+            logger.exception("Mongo instance connect fail!")
+            return False, repr(e)
 
-        return True
+        return True, "Connection Success!"
 
     def list_database_names(self):
         """

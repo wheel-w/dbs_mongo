@@ -3,6 +3,7 @@ import uuid
 from django.db import models
 
 from common.utils.aes_cipher import aes_cipher
+from common.utils.local import local
 from manager.constants import InstanceCreateType
 
 
@@ -13,8 +14,8 @@ class MongoInstanceManager(models.Manager):
 
         query_kwargs = {
             "db_host": instance_kwargs["db_host"],
-            "db_port": instance_kwargs.get("db_port", 27017),
-            "dbs_user_rtx": instance_kwargs["dbs_user_rtx"],
+            "db_port": instance_kwargs.get("db_port"),
+            "dbs_user_rtx": local.request_username,
         }
         query_result = self.get_queryset().filter(**query_kwargs).first()
         if query_result:
@@ -22,8 +23,7 @@ class MongoInstanceManager(models.Manager):
                 setattr(query_result, k, v)
             query_result.save()
             return query_result
-
-        return super().create(**instance_kwargs)
+        return super().create(dbs_user_rtx=local.request_username, **instance_kwargs)
 
     def get_instance(self, instance_id):
         return self.get_queryset().filter(pk=uuid.UUID(instance_id)).first()
@@ -55,13 +55,13 @@ class MongoInstance(models.Model):
     )
     db_host = models.CharField(verbose_name="数据库地址", max_length=256)
     db_port = models.IntegerField(verbose_name="数据库端口", default=27017)
-    db_user = models.CharField(verbose_name="数据库用户名", max_length=128, null=True, blank=True)
-    db_password = models.CharField(verbose_name="数据库密码", max_length=256, null=True, blank=True)
+    db_user = models.CharField(verbose_name="数据库用户名", max_length=128)
+    db_password = models.CharField(verbose_name="数据库密码", max_length=256)
     auth_source = models.CharField(verbose_name="认证数据库", default="admin", max_length=128)
     auth_mechanism = models.CharField(
         verbose_name="认证方式", choices=MONGO_AUTH_MECHANISM_CHOICES, default="DEFAULT", max_length=128
     )
-    update_time = models.DateTimeField(auto_now_add=True)
+    update_time = models.DateTimeField(auto_now=True)
     is_show = models.BooleanField(verbose_name="实例是否显示用于登录", default=False)
     dbs_user_rtx = models.CharField(verbose_name="dbs用户名", max_length=128)
 

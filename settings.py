@@ -89,6 +89,14 @@ LOGIN_CACHE_EXPIRED = 60
 AUTH_USER_MODEL = "account.User"
 AUTHENTICATION_BACKENDS = ("account.backends.UserBackend",)
 
+# drf 设置
+REST_FRAMEWORK = {
+    "DEFAULT_RENDERER_CLASSES": [
+        "common.drf.renderers.StandardResponseRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+    ],
+}
+
 # cache
 CACHES = {
     "db": {
@@ -111,9 +119,8 @@ AUTH_PASSWORD_VALIDATORS = []
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
-
-TIME_ZONE = "UTC"
+LANGUAGE_CODE = "zh-hans"
+TIME_ZONE = "Asia/Shanghai"
 
 USE_I18N = True
 
