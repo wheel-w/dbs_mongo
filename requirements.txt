@@ -6,3 +6,4 @@ pydantic==1.9.1
 django-filter==2.4.0
 pymongo==4.3.3
 pycryptodome==3.10.1
+Werkzeug==0.14.1

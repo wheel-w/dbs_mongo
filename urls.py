@@ -10,7 +10,7 @@ schema_view = get_schema_view(
     openapi.Info(
         title="Dbd Mongo API",
         default_version="v1",
-        description="Dbd Mongo API",
+        description="Dbs Mongo API",
     ),
     public=True,
     permission_classes=[permissions.IsAdminUser],
