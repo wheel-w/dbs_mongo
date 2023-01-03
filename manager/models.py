@@ -28,6 +28,12 @@ class MongoInstanceManager(models.Manager):
     def get_instance(self, instance_id):
         return self.get_queryset().filter(pk=uuid.UUID(instance_id)).first()
 
+    def get_dbs_user_rtx(self, instance_id):
+        qs = self.get_queryset().values("dbs_user_rtx").filter(pk=uuid.UUID(instance_id)).first()
+        if not qs:
+            return None
+        return qs.get("dbs_user_rtx")
+
 
 class MongoInstance(models.Model):
     # mongo认证方式

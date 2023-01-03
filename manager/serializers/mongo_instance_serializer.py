@@ -23,7 +23,6 @@ class MongoInstanceSerializer(serializers.ModelSerializer):
             },
             "db_password": {
                 "write_only": True,
-                "default": "",
             },
             "is_show": {"write_only": True},
             "auth_source": {"default": "admin"},
@@ -37,7 +36,7 @@ class MongoInstanceSerializer(serializers.ModelSerializer):
 
         if data["instance_create_type"] == InstanceCreateType.PAGE_LOGIN:
             with DbsMongoClient(instance_kwargs=data) as mongo_client:
-                result, message = mongo_client.test_connection()
+                result, message = mongo_client.dispatch("test_connection")
                 if not result:
                     raise serializers.ValidationError(message)
         return data
