@@ -12,10 +12,14 @@ class MongoInstanceManager(models.Manager):
         if "db_password" in instance_kwargs:
             instance_kwargs["db_password"] = aes_cipher.encrypt(instance_kwargs["db_password"])
 
+        if "dbs_user_rtx" not in instance_kwargs:
+            instance_kwargs["dbs_user_rtx"] = local.request_username
+
         query_kwargs = {
             "db_host": instance_kwargs["db_host"],
             "db_port": instance_kwargs.get("db_port"),
-            "dbs_user_rtx": local.request_username,
+            "instance_create_type": instance_kwargs.get("instance_create_type"),
+            "dbs_user_rtx": instance_kwargs["dbs_user_rtx"],
         }
         query_result = self.get_queryset().filter(**query_kwargs).first()
         if query_result:
@@ -23,7 +27,7 @@ class MongoInstanceManager(models.Manager):
                 setattr(query_result, k, v)
             query_result.save()
             return query_result
-        return super().create(dbs_user_rtx=local.request_username, **instance_kwargs)
+        return super().create(**instance_kwargs)
 
     def get_instance(self, instance_id):
         return self.get_queryset().filter(pk=uuid.UUID(instance_id)).first()
@@ -61,8 +65,8 @@ class MongoInstance(models.Model):
     )
     db_host = models.CharField(verbose_name="数据库地址", max_length=256)
     db_port = models.IntegerField(verbose_name="数据库端口", default=27017)
-    db_user = models.CharField(verbose_name="数据库用户名", max_length=128)
-    db_password = models.CharField(verbose_name="数据库密码", max_length=256)
+    db_user = models.CharField(verbose_name="数据库用户名", max_length=128, null=True, blank=True)
+    db_password = models.CharField(verbose_name="数据库密码", max_length=256, null=True, blank=True)
     auth_source = models.CharField(verbose_name="认证数据库", default="admin", max_length=128)
     auth_mechanism = models.CharField(
         verbose_name="认证方式", choices=MONGO_AUTH_MECHANISM_CHOICES, default="DEFAULT", max_length=128
@@ -83,3 +87,19 @@ class MongoInstance(models.Model):
     @property
     def plain_password(self):
         return aes_cipher.decrypt(self.db_password)
+
+
+class MongoInstanceSessionInfo(models.Model):
+    session_id = models.UUIDField(verbose_name="会话ID", primary_key=True, default=uuid.uuid4)
+    instance_id = models.UUIDField(verbose_name="session会话对应的实例id")
+    expire_at = models.DateTimeField(verbose_name="会话过期时间")
+    dbs_user_rtx = models.CharField(verbose_name="session会话生效人", max_length=128)
+    callback_url = models.URLField(verbose_name="session回调审计url", max_length=256, null=True, blank=True)
+    created_by = models.CharField(verbose_name="session会话创建人", max_length=128)
+    update_time = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            self.created_by = local.request_username
+
+        super().save(*args, **kwargs)

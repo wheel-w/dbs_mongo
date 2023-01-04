@@ -1,3 +1,5 @@
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
@@ -6,6 +8,7 @@ from manager.permissions.mongo_instance_permission import MongoInstancePermissio
 from manager.serializers.mongo_instance_serializer import (
     MongoInstanceLoginListSerializer,
     MongoInstanceSerializer,
+    MongoInstanceSessionAuthSerializer,
 )
 
 
@@ -24,3 +27,31 @@ class MongoInstanceViewSet(ModelViewSet):
     def perform_destroy(self, instance):
         instance.is_show = False
         instance.save()
+
+    @swagger_auto_schema(
+        method="POST", operation_summary="user_session_auth", request_body=MongoInstanceSessionAuthSerializer
+    )
+    @action(detail=False, methods=["POST"])
+    def user_session_auth(self, request):
+        serializer = MongoInstanceSessionAuthSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        session = serializer.save()
+        return Response(
+            {
+                "id": session.session_id,
+            }
+        )
+
+    @swagger_auto_schema(
+        method="POST", operation_summary="app_session_auth", request_body=MongoInstanceSessionAuthSerializer
+    )
+    @action(detail=False, methods=["POST"])
+    def app_session_auth(self, request):
+        serializer = MongoInstanceSessionAuthSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        session = serializer.save()
+        return Response(
+            {
+                "id": session.session_id,
+            }
+        )
