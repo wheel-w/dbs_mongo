@@ -1,10 +1,13 @@
+import datetime
+
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from common.env import settings
-from manager.models import MongoInstance
+from manager.constants import InstanceCreateType
+from manager.models import MongoInstance, MongoInstanceSessionInfo
 from manager.permissions.mongo_instance_permission import MongoInstancePermission
 from manager.serializers.mongo_instance_serializer import (
     MongoInstanceLoginListSerializer,
@@ -19,6 +22,12 @@ class MongoInstanceViewSet(ModelViewSet):
     permission_classes = [MongoInstancePermission]
     http_method_names = ["get", "post", "patch", "delete", "head", "options", "trace"]
 
+    @action(detail=True, methods=["GET"])
+    def session_instance(self, request, pk):
+        session = MongoInstanceSessionInfo.objects.get(pk=pk)
+        self.check_object_permissions(request, session)
+        return Response({"instance_id": session.instance_id})
+
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset()).filter(is_show=True, dbs_user_rtx=request.user.username)
 
@@ -32,29 +41,22 @@ class MongoInstanceViewSet(ModelViewSet):
     @swagger_auto_schema(
         method="POST", operation_summary="user_session_auth", request_body=MongoInstanceSessionAuthSerializer
     )
-    @action(detail=False, methods=["POST"])
-    def user_session_auth(self, request):
+    @action(detail=True, methods=["POST"])
+    def user_session_auth(self, request, pk):
+        instance = self.get_object()
         serializer = MongoInstanceSessionAuthSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        session = serializer.save()
+        data = serializer.data
+        instance.pk = None
+        instance.is_show = False
+        instance.instance_create_type = InstanceCreateType.SESSION_AUTH
+        instance.dbs_user_rtx = data["dbs_user_rtx"]
+        instance.save()
+        session_info = {
+            "instance_id": instance.pk,
+            "expire_at": datetime.datetime.now() + datetime.timedelta(seconds=data["session_timeout"]),
+            "dbs_user_rtx": data["dbs_user_rtx"],
+        }
+        session = MongoInstanceSessionInfo.objects.create(**session_info)
         session_link = "{}?session_id={}".format(settings.FRONTEND_LOGIN_URL, session.session_id)
-        return Response(
-            {
-                "session_link": session_link,
-            }
-        )
-
-    @swagger_auto_schema(
-        method="POST", operation_summary="app_session_auth", request_body=MongoInstanceSessionAuthSerializer
-    )
-    @action(detail=False, methods=["POST"])
-    def app_session_auth(self, request):
-        serializer = MongoInstanceSessionAuthSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        session = serializer.save()
-        session_link = "{}?session_id={}".format(settings.FRONTEND_LOGIN_URL, session.session_id)
-        return Response(
-            {
-                "session_link": session_link,
-            }
-        )
+        return Response({"session_link": session_link, "expire_at": session.expire_at.strftime("%Y-%m-%d %H:%M:%S")})
