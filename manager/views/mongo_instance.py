@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from common.env import settings
 from manager.models import MongoInstance
 from manager.permissions.mongo_instance_permission import MongoInstancePermission
 from manager.serializers.mongo_instance_serializer import (
@@ -36,9 +37,10 @@ class MongoInstanceViewSet(ModelViewSet):
         serializer = MongoInstanceSessionAuthSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         session = serializer.save()
+        session_link = "{}?session_id={}".format(settings.FRONTEND_LOGIN_URL, session.session_id)
         return Response(
             {
-                "id": session.session_id,
+                "session_link": session_link,
             }
         )
 
@@ -50,8 +52,9 @@ class MongoInstanceViewSet(ModelViewSet):
         serializer = MongoInstanceSessionAuthSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         session = serializer.save()
+        session_link = "{}?session_id={}".format(settings.FRONTEND_LOGIN_URL, session.session_id)
         return Response(
             {
-                "id": session.session_id,
+                "session_link": session_link,
             }
         )

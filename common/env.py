@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     LOGIN_AUTH_URL: str = ""
     SUPERUSERS: str = ""
     CORS_ALLOWED_HOSTS: str = ""
+    FRONTEND_LOGIN_URL: str = "xxx"
 
     class Config:
         case_sensitive = True
