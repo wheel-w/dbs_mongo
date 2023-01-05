@@ -2,8 +2,8 @@ import uuid
 
 from django.db import models
 
+from common.utils import local
 from common.utils.aes_cipher import aes_cipher
-from common.utils.local import local
 from manager.constants import InstanceCreateType
 
 
@@ -13,7 +13,7 @@ class MongoInstanceManager(models.Manager):
             instance_kwargs["db_password"] = aes_cipher.encrypt(instance_kwargs["db_password"])
 
         if "dbs_user_rtx" not in instance_kwargs:
-            instance_kwargs["dbs_user_rtx"] = local.request_username
+            instance_kwargs["dbs_user_rtx"] = local.get_request_username()
 
         query_kwargs = {
             "db_host": instance_kwargs["db_host"],
@@ -100,6 +100,6 @@ class MongoInstanceSessionInfo(models.Model):
 
     def save(self, *args, **kwargs):
         if self._state.adding:
-            self.created_by = local.request_username
+            self.created_by = local.get_request_username()
 
         super().save(*args, **kwargs)

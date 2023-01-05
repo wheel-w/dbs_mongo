@@ -51,6 +51,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "common.middlewares.TraceIDInjectMiddleware",
     "account.middlewares.LoginRequiredMiddleware",
 ]
 
@@ -149,11 +150,11 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
-            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "format": "[trace_id={trace_id}] {levelname} {asctime} {module} {process:d} {thread:d} {message}",
             "style": "{",
         },
         "simple": {
-            "format": "{levelname} {message}",
+            "format": "[trace_id={trace_id}] {levelname} {message}",
             "style": "{",
         },
     },
@@ -161,18 +162,20 @@ LOGGING = {
         "require_debug_true": {
             "()": "django.utils.log.RequireDebugTrue",
         },
+        "trace_id_inject_filter": {"()": "common.utils.log.TraceIDInjectFilter"},
     },
     "handlers": {
         "console": {
             "level": "INFO",
             "class": "logging.StreamHandler",
-            "filters": ["require_debug_true"],
+            "filters": ["require_debug_true", "trace_id_inject_filter"],
             "formatter": "simple",
         },
         "mongo-info": {
             "level": "INFO",
             "class": "logging.handlers.RotatingFileHandler",
             "filename": log_dir / "info.log",
+            "filters": ["trace_id_inject_filter"],
             "maxBytes": 1024 * 1024 * 100,
             "backupCount": 5,
         },
@@ -180,6 +183,7 @@ LOGGING = {
             "level": "ERROR",
             "class": "logging.handlers.RotatingFileHandler",
             "filename": log_dir / "error.log",
+            "filters": ["trace_id_inject_filter"],
             "maxBytes": 1024 * 1024 * 100,
             "backupCount": 5,
         },

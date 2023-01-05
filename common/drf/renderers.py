@@ -3,6 +3,8 @@ import json
 from rest_framework.compat import INDENT_SEPARATORS, LONG_SEPARATORS, SHORT_SEPARATORS
 from rest_framework.renderers import JSONRenderer
 
+from common.utils import local
+
 
 class StandardResponseRenderer(JSONRenderer):
     def render(self, data, accepted_media_type=None, renderer_context=None):
@@ -26,6 +28,7 @@ class StandardResponseRenderer(JSONRenderer):
                 "message": message,
                 "code": -1,
                 "data": None,
+                "trace_id": local.get_trace_id(),
             }
 
         else:
@@ -34,6 +37,7 @@ class StandardResponseRenderer(JSONRenderer):
                 "message": "success",
                 "code": 0,
                 "data": data,
+                "trace_id": local.get_trace_id(),
             }
 
         ret = json.dumps(
