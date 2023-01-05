@@ -17,7 +17,7 @@ from manager.serializers.mongo_operation_serializer import (
 
 class MongoOperationViewSet(GenericViewSet):
     queryset = "xxx"
-    serializer_class = "xxx"
+    serializer_class = DocumentQuerySerializer
     permission_classes = [MongoOperationPermission]
 
     @action(detail=True, methods=["GET"])
