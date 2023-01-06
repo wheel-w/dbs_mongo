@@ -8,3 +8,4 @@ pymongo==4.3.3
 pycryptodome==3.10.1
 Werkzeug==0.14.1
 gunicorn==19.6.0
+django-cors-headers==3.13.0

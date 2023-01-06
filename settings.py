@@ -27,6 +27,10 @@ SECRET_KEY = "django-insecure-e+00dp&69sgsw8l2wz0z5(%^lfs=_8(4b2v!3vyk8tme&r0k0j
 DEBUG = True
 
 ALLOWED_HOSTS = [s for s in settings.CORS_ALLOWED_HOSTS.split(",") if s]
+# 跨域配置
+CORS_ORIGIN_WHITELIST = [f"http://{s}" for s in settings.CORS_ALLOWED_HOSTS.split(",") if s]
+CORS_ORIGIN_WHITELIST += [f"https://{s}" for s in settings.CORS_ALLOWED_HOSTS.split(",") if s]
+CORS_ALLOW_CREDENTIALS = True
 
 # Application definition
 
@@ -41,6 +45,7 @@ INSTALLED_APPS = [
     "account",
     "rest_framework",
     "drf_yasg",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
@@ -51,6 +56,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "common.middlewares.TraceIDInjectMiddleware",
     "account.middlewares.LoginRequiredMiddleware",
 ]
