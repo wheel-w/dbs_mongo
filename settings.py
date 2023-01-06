@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent
 SECRET_KEY = "django-insecure-e+00dp&69sgsw8l2wz0z5(%^lfs=_8(4b2v!3vyk8tme&r0k0j"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = settings.RUNTIME_ENVIRONMENT == "dev"
 
 ALLOWED_HOSTS = [s for s in settings.CORS_ALLOWED_HOSTS.split(",") if s]
 # 跨域配置
