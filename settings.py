@@ -55,6 +55,10 @@ MIDDLEWARE = [
     "account.middlewares.LoginRequiredMiddleware",
 ]
 
+# csrf config
+CSRF_COOKIE_DOMAIN = settings.CSRF_COOKIE_DOMAIN or None
+CSRF_COOKIE_NAME = "dbs_mongo-csrftoken"
+
 ROOT_URLCONF = "urls"
 
 TEMPLATES = [
