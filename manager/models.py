@@ -98,6 +98,10 @@ class MongoInstanceSessionInfo(models.Model):
     created_by = models.CharField(verbose_name="session会话创建人", max_length=128)
     update_time = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        db_table = "mongo_instance_session_info"
+        ordering = ["-update_time"]
+
     def save(self, *args, **kwargs):
         if self._state.adding:
             self.created_by = local.get_request_username()
