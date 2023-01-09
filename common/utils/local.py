@@ -19,3 +19,11 @@ def set_trace_id(trace_id: str):
 
 def get_trace_id() -> typing.Optional[str]:
     return getattr(__LOCAL_STORAGE, "trace_id", None)
+
+
+def set_app_code(app_code: str):
+    __LOCAL_STORAGE.app_code = app_code
+
+
+def get_app_code() -> typing.Optional[str]:
+    return getattr(__LOCAL_STORAGE, "app_code", None)

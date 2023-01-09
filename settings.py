@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_yasg",
     "corsheaders",
+    "api_gateway",
 ]
 
 MIDDLEWARE = [
@@ -57,6 +58,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "api_gateway.middlewares.ApplicationInjectMiddleware",
     "common.middlewares.TraceIDInjectMiddleware",
     "account.middlewares.LoginRequiredMiddleware",
 ]

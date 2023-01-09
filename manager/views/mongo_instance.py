@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from common.env import settings
+from common.utils import local
 from manager.constants import InstanceCreateType
 from manager.models import MongoInstance, MongoInstanceSessionInfo
 from manager.permissions.mongo_instance_permission import MongoInstancePermission
@@ -29,7 +30,14 @@ class MongoInstanceViewSet(ModelViewSet):
         return Response({"instance_id": session.instance_id})
 
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset()).filter(is_show=True, dbs_user_rtx=request.user.username)
+        app_code = local.get_app_code()
+        if app_code:
+            instance_create_type = InstanceCreateType.APIGW_CREATED
+        else:
+            instance_create_type = InstanceCreateType.PAGE_LOGIN
+        queryset = self.filter_queryset(self.get_queryset()).filter(
+            is_show=True, dbs_user_rtx=local.get_request_username(), instance_create_type=instance_create_type
+        )
 
         serializer = MongoInstanceLoginListSerializer(queryset, many=True)
         return Response(serializer.data)
@@ -42,15 +50,20 @@ class MongoInstanceViewSet(ModelViewSet):
         method="POST", operation_summary="user_session_auth", request_body=MongoInstanceSessionAuthSerializer
     )
     @action(detail=True, methods=["POST"])
-    def user_session_auth(self, request, pk):
+    def user_session_link(self, request, pk):
         instance = self.get_object()
         serializer = MongoInstanceSessionAuthSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.data
         instance.pk = None
         instance.is_show = False
-        instance.instance_create_type = InstanceCreateType.SESSION_AUTH
         instance.dbs_user_rtx = data["dbs_user_rtx"]
+        app_code = local.get_app_code()
+        if app_code:
+            instance.instance_create_type = InstanceCreateType.APIGW_CREATED
+        else:
+            instance.instance_create_type = InstanceCreateType.PAGE_LOGIN
+        instance.created_by = local.get_request_username()
         instance.save()
         session_info = {
             "instance_id": instance.pk,

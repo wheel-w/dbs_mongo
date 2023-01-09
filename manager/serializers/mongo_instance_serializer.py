@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from manager.client import DbsMongoClient
-from manager.constants import InstanceCreateType
 from manager.models import MongoInstance
 
 
@@ -14,7 +13,7 @@ class MongoInstanceLoginListSerializer(serializers.ModelSerializer):
 class MongoInstanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = MongoInstance
-        fields = "__all__"
+        exclude = ["instance_create_type"]
         extra_kwargs = {
             "instance_id": {"read_only": True},
             "update_time": {"read_only": True, "format": "%Y-%m-%d %H:%M:%S"},
@@ -31,6 +30,9 @@ class MongoInstanceSerializer(serializers.ModelSerializer):
             "auth_source": {"default": "admin"},
             "auth_mechanism": {"default": "DEFAULT"},
             "db_port": {"default": 27017},
+            "created_by": {
+                "read_only": True,
+            },
         }
 
     def validate(self, data):
@@ -44,7 +46,6 @@ class MongoInstanceSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        validated_data["instance_create_type"] = InstanceCreateType.PAGE_LOGIN
         instance = MongoInstance.objects.create_instance(validated_data)
         return instance
 

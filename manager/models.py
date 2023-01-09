@@ -15,6 +15,12 @@ class MongoInstanceManager(models.Manager):
         if "dbs_user_rtx" not in instance_kwargs:
             instance_kwargs["dbs_user_rtx"] = local.get_request_username()
 
+        app_code = local.get_app_code()
+        if app_code:
+            instance_kwargs["instance_create_type"] = InstanceCreateType.APIGW_CREATED
+        else:
+            instance_kwargs["instance_create_type"] = InstanceCreateType.PAGE_LOGIN
+        instance_kwargs["created_by"] = local.get_request_username()
         query_kwargs = {
             "db_host": instance_kwargs["db_host"],
             "db_port": instance_kwargs.get("db_port"),
@@ -30,10 +36,25 @@ class MongoInstanceManager(models.Manager):
         return super().create(**instance_kwargs)
 
     def get_instance(self, instance_id):
-        return self.get_queryset().filter(pk=uuid.UUID(instance_id)).first()
+        app_code = local.get_app_code()
+        if app_code:
+            instance_create_type = InstanceCreateType.APIGW_CREATED
+        else:
+            instance_create_type = InstanceCreateType.PAGE_LOGIN
+        return self.get_queryset().filter(pk=uuid.UUID(instance_id), instance_create_type=instance_create_type).first()
 
     def get_dbs_user_rtx(self, instance_id):
-        qs = self.get_queryset().values("dbs_user_rtx").filter(pk=uuid.UUID(instance_id)).first()
+        app_code = local.get_app_code()
+        if app_code:
+            instance_create_type = InstanceCreateType.APIGW_CREATED
+        else:
+            instance_create_type = InstanceCreateType.PAGE_LOGIN
+        qs = (
+            self.get_queryset()
+            .values("dbs_user_rtx")
+            .filter(pk=uuid.UUID(instance_id), instance_create_type=instance_create_type)
+            .first()
+        )
         if not qs:
             return None
         return qs.get("dbs_user_rtx")
@@ -55,7 +76,7 @@ class MongoInstance(models.Model):
     # 实例创建认证类型
     INSTANCE_CREATE_TYPE = (
         (InstanceCreateType.PAGE_LOGIN, "PAGE_LOGIN"),
-        (InstanceCreateType.SESSION_AUTH, "SESSION_AUTH"),
+        (InstanceCreateType.APIGW_CREATED, "APIGW_CREATED"),
     )
 
     instance_id = models.UUIDField(verbose_name="实例ID", primary_key=True, default=uuid.uuid4)
@@ -73,7 +94,8 @@ class MongoInstance(models.Model):
     )
     update_time = models.DateTimeField(auto_now=True)
     is_show = models.BooleanField(verbose_name="实例是否显示用于登录", default=False)
-    dbs_user_rtx = models.CharField(verbose_name="dbs用户名", max_length=128)
+    dbs_user_rtx = models.CharField(verbose_name="dbs用户名", max_length=32)
+    created_by = models.CharField(verbose_name="实例创建者", max_length=32, default="")
 
     objects = MongoInstanceManager()
 
