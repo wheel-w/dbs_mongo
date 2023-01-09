@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
 
 from api_gateway.models import ApplicationInfo
@@ -18,6 +19,16 @@ class ApplicationInjectMiddleware(MiddlewareMixin):
             local.set_request_username(request_username)
             setattr(view, "login_exempt", True)
             request._dont_enforce_csrf_checks = True
+        else:
+            return JsonResponse(
+                {
+                    "result": False,
+                    "message": "X-APP-CODE or X-APP-SECRET in request headers missing or incorrect",
+                    "code": -1,
+                    "data": None,
+                },
+                status=403,
+            )
         return None
 
     def process_response(self, request, response):
