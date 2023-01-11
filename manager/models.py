@@ -114,6 +114,7 @@ class MongoInstance(models.Model):
 class MongoInstanceSessionInfo(models.Model):
     session_id = models.UUIDField(verbose_name="会话ID", primary_key=True, default=uuid.uuid4)
     instance_id = models.UUIDField(verbose_name="session会话对应的实例id")
+    source_instance_id = models.UUIDField(verbose_name="共享的源实例id", null=True, blank=True)
     expire_at = models.DateTimeField(verbose_name="会话过期时间")
     dbs_user_rtx = models.CharField(verbose_name="session会话生效人", max_length=128)
     callback_url = models.URLField(verbose_name="session回调审计url", max_length=256, null=True, blank=True)

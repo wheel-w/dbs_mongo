@@ -2,6 +2,7 @@ import datetime
 
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
@@ -25,7 +26,8 @@ class MongoInstanceViewSet(ModelViewSet):
 
     @action(detail=True, methods=["GET"])
     def session_instance(self, request, pk):
-        session = MongoInstanceSessionInfo.objects.get(pk=pk)
+        session_qs = MongoInstanceSessionInfo.objects.all()
+        session = get_object_or_404(session_qs, pk=pk)
         now = datetime.datetime.now()
         if (now - session.expire_at).total_seconds() > 0:
             return Response("session link is expired", exception=True)
@@ -53,23 +55,21 @@ class MongoInstanceViewSet(ModelViewSet):
         method="POST", operation_summary="user_session_auth", request_body=MongoInstanceSessionAuthSerializer
     )
     @action(detail=True, methods=["POST"])
-    def user_session_link(self, request, pk):
+    def session_link(self, request, pk):
         instance = self.get_object()
+        source_instance_id = instance.pk
         serializer = MongoInstanceSessionAuthSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.data
         instance.pk = None
         instance.is_show = False
         instance.dbs_user_rtx = data["dbs_user_rtx"]
-        app_code = local.get_app_code()
-        if app_code:
-            instance.instance_create_type = InstanceCreateType.APIGW_CREATED
-        else:
-            instance.instance_create_type = InstanceCreateType.PAGE_LOGIN
+        instance.instance_create_type = InstanceCreateType.PAGE_LOGIN
         instance.created_by = local.get_request_username()
         instance.save()
         session_info = {
             "instance_id": instance.pk,
+            "source_instance_id": source_instance_id,
             "expire_at": datetime.datetime.now() + datetime.timedelta(seconds=data["session_timeout"]),
             "dbs_user_rtx": data["dbs_user_rtx"],
         }
