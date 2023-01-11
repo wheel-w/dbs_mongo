@@ -26,6 +26,9 @@ class MongoInstanceViewSet(ModelViewSet):
     @action(detail=True, methods=["GET"])
     def session_instance(self, request, pk):
         session = MongoInstanceSessionInfo.objects.get(pk=pk)
+        now = datetime.datetime.now()
+        if (now - session.expire_at).total_seconds() > 0:
+            return Response("session link is expired", exception=True)
         self.check_object_permissions(request, session)
         return Response({"instance_id": session.instance_id})
 
