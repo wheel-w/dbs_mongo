@@ -26,6 +26,7 @@ class ApplicationInjectMiddleware(MiddlewareMixin):
                     "message": "X-APP-CODE or X-APP-SECRET in request headers missing or incorrect",
                     "code": -1,
                     "data": None,
+                    "trace_id": local.get_trace_id(),
                 },
                 status=403,
             )

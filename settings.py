@@ -58,8 +58,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    "api_gateway.middlewares.ApplicationInjectMiddleware",
     "common.middlewares.TraceIDInjectMiddleware",
+    "api_gateway.middlewares.ApplicationInjectMiddleware",
     "account.middlewares.LoginRequiredMiddleware",
 ]
 
