@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from manager.models import MongoInstance, MongoInstanceSessionInfo
+from manager.models import MongoInstance, MongoInstanceSessionInfo, OperationRecord
 
 
 class MongoInstanceAdmin(admin.ModelAdmin):
@@ -17,3 +17,11 @@ class MongoInstanceSessionInfoAdmin(admin.ModelAdmin):
 
 
 admin.site.register(MongoInstanceSessionInfo, MongoInstanceSessionInfoAdmin)
+
+
+class OperationRecordAdmin(admin.ModelAdmin):
+    list_display = ["trace_id", "instance_id", "api_name", "occur_time"]
+    search_fields = ["trace_id", "instance_id", "api_name"]
+
+
+admin.site.register(OperationRecord, OperationRecordAdmin)
