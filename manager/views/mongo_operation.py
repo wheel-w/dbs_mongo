@@ -1,9 +1,11 @@
+from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from manager.client import DbsMongoClient
+from manager.decorators import operation_record
 from manager.permissions.mongo_operation_permission import MongoOperationPermission
 from manager.serializers.mongo_operation_serializer import (
     DocumentDeleteSerializer,
@@ -15,6 +17,7 @@ from manager.serializers.mongo_operation_serializer import (
 )
 
 
+@method_decorator(operation_record, name="dispatch")
 class MongoOperationViewSet(GenericViewSet):
     queryset = "xxx"
     serializer_class = DocumentQuerySerializer
