@@ -136,7 +136,7 @@ class OperationRecord(models.Model):
     trace_id = models.UUIDField(verbose_name="请求的trace_id", primary_key=True)
     instance_id = models.UUIDField(verbose_name="mongo实例id")
     api_name = models.CharField(verbose_name="操作的api名称", max_length=64)
-    api_data = models.TextField(verbose_name="操作请求数据")
+    api_data = models.JSONField(verbose_name="操作请求数据")
     api_response = models.TextField(verbose_name="请求结果")
     occur_time = models.DateTimeField(verbose_name="操作发生时间", auto_now_add=True)
 

@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from manager.client import DbsMongoClient
-from manager.decorators import operation_record
+from manager.decorators import operation_fail_record, operation_record
 from manager.permissions.mongo_operation_permission import MongoOperationPermission
 from manager.serializers.mongo_operation_serializer import (
     DocumentDeleteSerializer,
@@ -17,7 +17,8 @@ from manager.serializers.mongo_operation_serializer import (
 )
 
 
-@method_decorator(operation_record, name="dispatch")
+@method_decorator(operation_record, name="initial")
+@method_decorator(operation_fail_record, name="dispatch")
 class MongoOperationViewSet(GenericViewSet):
     queryset = "xxx"
     serializer_class = DocumentQuerySerializer
