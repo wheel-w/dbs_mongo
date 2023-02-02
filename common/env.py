@@ -2,7 +2,7 @@ from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
-    LOGIN_ACCOUNT_COMPONENT_NAME: str = "bk_ticket"
+    LOGIN_ACCOUNT_COMPONENT_NAME: str = "default"
     SECRET_KEY: str = "this is a secret key"
     RUNTIME_ENVIRONMENT: str = "dev"
     CSRF_COOKIE_DOMAIN: str = ""

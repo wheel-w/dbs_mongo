@@ -2,7 +2,7 @@
 
 # 1. 登录相关配置
 ### 登录使用组件名称[bk_ticket]
-export LOGIN_ACCOUNT_COMPONENT_NAME=""
+export LOGIN_ACCOUNT_COMPONENT_NAME="default"
 ### 登录PaaS平台鉴权URL
 export LOGIN_AUTH_URL=""
 

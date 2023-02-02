@@ -54,7 +54,6 @@ def refresh_superuser(request):
         {
             "code": 0,
             "result": True,
-            "data": {},
             "message": "ok",
         }
     )

@@ -8,4 +8,7 @@ def load_backend(component_name):
     return import_string(path)
 
 
-UserBackend = load_backend(settings.LOGIN_ACCOUNT_COMPONENT_NAME)
+if settings.LOGIN_ACCOUNT_COMPONENT_NAME == "default":
+    UserBackend = import_string("django.contrib.auth.backends.ModelBackend")
+else:
+    UserBackend = load_backend(settings.LOGIN_ACCOUNT_COMPONENT_NAME)

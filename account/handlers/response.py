@@ -13,9 +13,20 @@ class ResponseHandler(object):
             "c_url",
         )
         context = {
+            "code": 1,
             "result": False,
             "message": "用户认证失败，请先进行登录",
             "login_url": _login_url,
+        }
+
+        return JsonResponse(context, status=401)
+
+    def build_jwt_401_response(self, request):
+        context = {
+            "code": 1,
+            "result": False,
+            "message": "用户认证失败，请先进行登录",
+            "login_url": "xxx",
         }
 
         return JsonResponse(context, status=401)

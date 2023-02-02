@@ -11,7 +11,6 @@ logger = logging.getLogger("mongo")
 
 class UserBackend(ModelBackend):
     def authenticate(self, request=None, bk_ticket=None):
-        logger.debug("进入 Paas 认证 Backend")
         if not bk_ticket:
             return None
 
@@ -28,17 +27,6 @@ class UserBackend(ModelBackend):
 
     @staticmethod
     def verify_bk_ticket(bk_ticket, request=None):
-        """
-        验证 OA 登录票据
-        @param {string} bk_ticket OA 登录票据
-        @return {tuple} ret
-        @return {boolean} ret[0] 是否认证通过
-        @return {dict} ret[1] 当 result=True，该字段为用户信息，举例
-            {
-                'username': 'tester',
-                'avatar_url': 'http://???.??.com/avatars/tester/avatar.jpg'
-            }
-        """
         ulr = "{}/user/get_info/?bk_ticket={}".format(settings.LOGIN_AUTH_URL, bk_ticket)
         try:
             response = requests.get(ulr).json()
