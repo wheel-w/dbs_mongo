@@ -10,6 +10,11 @@ class Settings(BaseSettings):
     SUPERUSERS: str = ""
     CORS_ALLOWED_HOSTS: str = ""
     FRONTEND_LOGIN_URL: str = "xxx"
+    MYSQL_DATABASE_NAME: str = ""
+    MYSQL_USER: str = ""
+    MYSQL_PASSWORD: str = ""
+    MYSQL_HOST: str = ""
+    MYSQL_PORT: str = ""
 
     class Config:
         case_sensitive = True

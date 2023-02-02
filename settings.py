@@ -90,12 +90,24 @@ WSGI_APPLICATION = "wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+if settings.RUNTIME_ENVIRONMENT == "dev":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": settings.MYSQL_DATABASE_NAME,
+            "USER": settings.MYSQL_USER,
+            "PASSWORD": settings.MYSQL_PASSWORD,
+            "HOST": settings.MYSQL_HOST,
+            "PORT": settings.MYSQL_PORT,
+        },
+    }
 
 # account
 LOGIN_CACHE_EXPIRED = 60
@@ -111,7 +123,7 @@ REST_FRAMEWORK = {
 }
 
 # static
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles", "static")
 # cache
 CACHES = {
     "db": {
