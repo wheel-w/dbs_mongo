@@ -113,6 +113,8 @@ else:
 # account
 # 登录缓存时间配置, 单位秒（与django cache单位一致）
 LOGIN_CACHE_EXPIRED = 60 * 10
+LOGIN_URL = "/account/login/"
+LOGOUT_URL = "/account/logout/"
 AUTH_USER_MODEL = "account.User"
 AUTHENTICATION_BACKENDS = ("account.backends.UserBackend",)
 

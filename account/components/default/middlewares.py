@@ -1,16 +1,15 @@
 import logging
 
 from django.contrib import auth
-from django.core.cache import caches
 from django.utils.deprecation import MiddlewareMixin
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken
 
+from account.components.default.forms import AuthenticationForm
 from account.handlers.response import ResponseHandler
 from common.utils import local
 
 logger = logging.getLogger("mongo")
-cache = caches["login_db"]
 
 
 class LoginRequiredMiddleware(MiddlewareMixin, JWTAuthentication):
@@ -36,15 +35,13 @@ class LoginRequiredMiddleware(MiddlewareMixin, JWTAuthentication):
         return response
 
     def authenticate(self, request):
-        header = self.get_header(request)
-        if header is None:
+        form = AuthenticationForm(request.COOKIES)
+        if not form.is_valid():
             return None
 
-        raw_token = self.get_raw_token(header)
-        if raw_token is None:
-            return None
+        dbs_token = form.cleaned_data["dbs_token"]
 
-        validated_token = self.get_validated_token(raw_token)
+        validated_token = self.get_validated_token(dbs_token)
 
         user = self.get_user(validated_token)
         if user is not None and user.username != request.user.username:
