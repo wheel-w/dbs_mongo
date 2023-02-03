@@ -1,12 +1,9 @@
-import json
 import time
 
 from django.contrib.auth import logout as default_logout
 from django.http import JsonResponse
 from django.middleware import csrf
 
-from account import get_user_model
-from account.decorators import login_exempt
 from account.models import User
 from common.env import settings
 
@@ -59,22 +56,6 @@ def refresh_superuser(request):
             "code": 0,
             "result": True,
             "message": "ok",
-        }
-    )
-
-
-@login_exempt
-def register(request):
-    user_model = get_user_model()
-    body = json.loads(request.body)
-    username = body["username"]
-    password = body["password"]
-    user_model.objects.create_user(username, password)
-    return JsonResponse(
-        {
-            "code": 0,
-            "result": True,
-            "message": "register success",
         }
     )
 
