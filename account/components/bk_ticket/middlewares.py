@@ -26,7 +26,7 @@ class LoginRequiredMiddleware(MiddlewareMixin):
             return None
 
         handler = ResponseHandler()
-        return handler.build_ajax_401_response(request)
+        return handler.build_bk_ticket_401_response(request)
 
     def process_response(self, request, response):
         return response
